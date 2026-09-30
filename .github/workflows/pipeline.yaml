@@ -23,40 +23,39 @@ jobs:
 
           Write-Host "Searching for Dockerfile:"
           Get-ChildItem -Path . -Filter Dockerfile -Recurse
-      - name: Check Docker Secrets
-        run: |
-          if ([string]::IsNullOrEmpty("${{ secrets.DOCKERHUB_USERNAME }}")) {
-            Write-Host "DOCKERHUB_USERNAME is EMPTY"
-          } else {
-            Write-Host "DOCKERHUB_USERNAME is available"
-          }
-          if ([string]::IsNullOrEmpty("${{ secrets.DOCKERHUB_TOKEN }}")) {
-            Write-Host "DOCKERHUB_TOKEN is EMPTY"
-          } else {
-            Write-Host "DOCKERHUB_TOKEN is available"
-          }
+      # - name: Check Docker Secrets
+      #   run: |
+      #     if ([string]::IsNullOrEmpty("${{ secrets.DOCKERHUB_USERNAME }}")) {
+      #       Write-Host "DOCKERHUB_USERNAME is EMPTY"
+      #     } else {
+      #       Write-Host "DOCKERHUB_USERNAME is available"
+      #     }
+      #     if ([string]::IsNullOrEmpty("${{ secrets.DOCKERHUB_TOKEN }}")) {
+      #       Write-Host "DOCKERHUB_TOKEN is EMPTY"
+      #     } else {
+      #       Write-Host "DOCKERHUB_TOKEN is available"
+      #     }
 
       # 2. Login to Docker Hub
       
       - name: Docker Login
         run: |
-          echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin $core_token
-        shell: powershell
+          echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
 
       # 3. Build Docker image
       - name: Build Docker Image
         run: |
-          docker build -t praabhatkumar1991/devops-app:${{ github.run_number }} .
+          docker build -t precious0410/devops-app:${{ github.run_number }} .
 
       # 4. Push Docker image to Docker Hub
       - name: Push Docker Image
         run: |
-          docker push praabhatkumar1991/devops-app:${{ github.run_number }}
+          docker push precious0410/devops-app:${{ github.run_number }}
 
       # 5. Update Kubernetes deployment with new image
       - name: Deploy to Kubernetes
         run: |
-          kubectl set image deployment/devops-app devops-app=praabhatkumar1991/devops-app:${{ github.run_number }}
+          kubectl set image deployment/devops-app devops-app=precious0410/devops-app:${{ github.run_number }}
 
       # 6. Wait until rollout is completed
       - name: Wait for Deployment
