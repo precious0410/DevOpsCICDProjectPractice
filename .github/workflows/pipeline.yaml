@@ -35,20 +35,20 @@ jobs:
       #     } else {
       #       Write-Host "DOCKERHUB_TOKEN is available"
       #     }
-      - name: Check Docker credentials
-        shell: bash
-        run: |
-          if [ -z "${{ secrets.DOCKERHUB_USERNAME }}" ]; then
-            echo "DOCKERHUB_USERNAME is NOT available"
-          else
-            echo "DOCKERHUB_USERNAME is available"
-          fi
+      # - name: Check Docker credentials
+      #   shell: bash
+      #   run: |
+      #     if [ -z "${{ secrets.DOCKERHUB_USERNAME }}" ]; then
+      #       echo "DOCKERHUB_USERNAME is NOT available"
+      #     else
+      #       echo "DOCKERHUB_USERNAME is available"
+      #     fi
 
-          if [ -z "${{ secrets.DOCKERHUB_TOKEN }}" ]; then
-            echo "DOCKERHUB_TOKEN is NOT available"
-          else
-            echo "DOCKERHUB_TOKEN is available"
-          fi
+      #     if [ -z "${{ secrets.DOCKERHUB_TOKEN }}" ]; then
+      #       echo "DOCKERHUB_TOKEN is NOT available"
+      #     else
+      #       echo "DOCKERHUB_TOKEN is available"
+      #     fi
 
       # 2. Login to Docker Hub
       
