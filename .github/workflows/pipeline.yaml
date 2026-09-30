@@ -23,6 +23,19 @@ jobs:
 
           Write-Host "Searching for Dockerfile:"
           Get-ChildItem -Path . -Filter Dockerfile -Recurse
+      - name: Check Docker Secrets
+        run: |
+          if ([string]::IsNullOrEmpty("${{ secrets.DOCKERHUB_USERNAME }}")) {
+            Write-Host "USERNAME is EMPTY"
+          } else {
+            Write-Host "USERNAME is available"
+          }
+
+          if ([string]::IsNullOrEmpty("${{ secrets.DOCKERHUB_TOKEN }}")) {
+            Write-Host "TOKEN is EMPTY"
+          } else {
+            Write-Host "TOKEN is available"
+          }  
       # - name: Check Docker Secrets
       #   run: |
       #     if ([string]::IsNullOrEmpty("${{ secrets.DOCKERHUB_USERNAME }}")) {
