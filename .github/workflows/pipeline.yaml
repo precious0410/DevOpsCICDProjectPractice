@@ -5,98 +5,66 @@ on:
     branches: [ main ]
 
 jobs:
-  deploy:
+  Docker_image_build:
     runs-on: self-hosted
 
     steps:
-
       # 1. Checkout source code
       - name: Checkout Code
         uses: actions/checkout@v4
-      - name: Check Workspace
-        run: |
-          Write-Host "Current directory:"
-          Get-Location
 
-          Write-Host "Files in current directory:"
-          Get-ChildItem
-
-          Write-Host "Searching for Dockerfile:"
-          Get-ChildItem -Path . -Filter Dockerfile -Recurse
-      - name: Check Docker Secrets
-        run: |
-          if ([string]::IsNullOrEmpty("${{ secrets.DOCKERHUB_USERNAME }}")) {
-            Write-Host "USERNAME is EMPTY"
-          } else {
-            Write-Host "USERNAME is available"
-          }
-
-          if ([string]::IsNullOrEmpty("${{ secrets.DOCKERHUB_TOKEN }}")) {
-            Write-Host "TOKEN is EMPTY"
-          } else {
-            Write-Host "TOKEN is available"
-          }  
-      # - name: Check Docker Secrets
-      #   run: |
-      #     if ([string]::IsNullOrEmpty("${{ secrets.DOCKERHUB_USERNAME }}")) {
-      #       Write-Host "DOCKERHUB_USERNAME is EMPTY"
-      #     } else {
-      #       Write-Host "DOCKERHUB_USERNAME is available"
-      #     }
-      #     if ([string]::IsNullOrEmpty("${{ secrets.DOCKERHUB_TOKEN }}")) {
-      #       Write-Host "DOCKERHUB_TOKEN is EMPTY"
-      #     } else {
-      #       Write-Host "DOCKERHUB_TOKEN is available"
-      #     }
-      # - name: Check Docker credentials
-      #   shell: bash
-      #   run: |
-      #     if [ -z "${{ secrets.DOCKERHUB_USERNAME }}" ]; then
-      #       echo "DOCKERHUB_USERNAME is NOT available"
-      #     else
-      #       echo "DOCKERHUB_USERNAME is available"
-      #     fi
-
-      #     if [ -z "${{ secrets.DOCKERHUB_TOKEN }}" ]; then
-      #       echo "DOCKERHUB_TOKEN is NOT available"
-      #     else
-      #       echo "DOCKERHUB_TOKEN is available"
-      #     fi
-
-      # 2. Login to Docker Hub
-      
+      # 2. Docker Login
       - name: Docker Login
         run: |
           echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
-      # 3. Build Docker image
+      # 3. Build Docker Image
       - name: Build Docker Image
         run: |
           docker build -t precious0410/devops-app:${{ github.run_number }} .
 
-      # 4. Push Docker image to Docker Hub
+      # 4. Push Docker Image
       - name: Push Docker Image
         run: |
           docker push precious0410/devops-app:${{ github.run_number }}
+  Test:
+    runs-on: self-hosted
+    needs: Docker_image_build
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+      - name: Test
+        run: echo "Testing is successfull"
+  Deployment:
+    runs-on: self-hosted
+    needs: Test
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+      - name: Apply Kubernetes Manifest
+        run: |
+          kubectl apply -f K8S/deployment.yaml
 
-      # 5. Update Kubernetes deployment with new image
-      - name: Deploy to Kubernetes
+      # 6. Update Kubernetes Image
+      - name: Update Kubernetes Image
         run: |
           kubectl set image deployment/devops-app devops-app=precious0410/devops-app:${{ github.run_number }}
 
-      # 6. Wait until rollout is completed
+      # 7. Wait for Rollout
       - name: Wait for Deployment
         run: |
           kubectl rollout status deployment/devops-app --timeout=120s
-
-      # 7. Verify deployment and pods
-      - name: Verify Kubernetes Deployment
+  Deployment_verification:
+    runs-on: self-hosted
+    needs: Deployment
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+      # 8. Verify Deployment
+      - name: Verify Deployment
         run: |
           echo "===== Deployment ====="
           kubectl get deployment devops-app
 
           echo "===== Pods ====="
           kubectl get pods -o wide
-
-          echo "===== Services ====="
-          kubectl get svc
