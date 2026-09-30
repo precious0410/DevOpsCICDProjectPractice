@@ -2,7 +2,7 @@ name: Local CI-CD Pipeline1
 
 on:
   push:
-    branches: [ master ]
+    branches: [ main ]
 
 jobs:
   deploy:
